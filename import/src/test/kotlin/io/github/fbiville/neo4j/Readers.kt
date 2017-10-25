@@ -15,30 +15,10 @@
  */
 package io.github.fbiville.neo4j
 
-import org.neo4j.graphdb.event.TransactionData
-import org.neo4j.graphdb.event.TransactionEventHandler
-import java.util.concurrent.atomic.AtomicInteger
+import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 
-class CommitCounter : TransactionEventHandler<Any?> {
+object Readers {
 
-    private val count = AtomicInteger(0)
-
-    override fun afterRollback(p0: TransactionData?, p1: Any?) {
-    }
-
-    override fun beforeCommit(p0: TransactionData?): Any? {
-        return null
-    }
-
-    override fun afterCommit(p0: TransactionData?, p1: Any?) {
-        count.incrementAndGet()
-    }
-
-    fun getCount(): Int {
-        return count.get()
-    }
-
-    fun reset() {
-        count.set(0)
-    }
+    fun newReader(path: String) = InputStreamReader(this::class.java.getResourceAsStream(path), StandardCharsets.UTF_8)
 }

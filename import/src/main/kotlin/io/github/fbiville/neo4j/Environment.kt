@@ -15,30 +15,8 @@
  */
 package io.github.fbiville.neo4j
 
-import org.neo4j.graphdb.event.TransactionData
-import org.neo4j.graphdb.event.TransactionEventHandler
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.Locale
 
-class CommitCounter : TransactionEventHandler<Any?> {
-
-    private val count = AtomicInteger(0)
-
-    override fun afterRollback(p0: TransactionData?, p1: Any?) {
-    }
-
-    override fun beforeCommit(p0: TransactionData?): Any? {
-        return null
-    }
-
-    override fun afterCommit(p0: TransactionData?, p1: Any?) {
-        count.incrementAndGet()
-    }
-
-    fun getCount(): Int {
-        return count.get()
-    }
-
-    fun reset() {
-        count.set(0)
-    }
+internal object Environment {
+    val locale = Locale.FRENCH
 }

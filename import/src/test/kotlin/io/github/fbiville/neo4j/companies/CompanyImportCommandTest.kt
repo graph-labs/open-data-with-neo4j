@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.fbiville.neo4j
+package io.github.fbiville.neo4j.companies
 
-import org.assertj.core.api.Assertions.assertThat
+import io.github.fbiville.neo4j.main
+import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -27,7 +28,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors
 
-class MainKtTest {
+class CompanyImportCommandTest {
 
     companion object {
         @JvmStatic
@@ -39,7 +40,7 @@ class MainKtTest {
 
     @get:Rule
     val file = TemporaryFolder()
-    
+
     @get:Rule
     val db = Neo4jRule()
 
@@ -49,9 +50,9 @@ class MainKtTest {
     fun prepare() {
         csvFile = file.newFile().toPath()
         Files.write(csvFile, listOf(
-            "identifiant,pays_code,pays,secteur_activite_code,secteur,denomination_sociale,adresse_1,adresse_2,adresse_3,adresse_4,code_postal,ville",
-            "XSQKIAGK,[FR],FRANCE,[DM],Dispositifs médicaux,Cook France SARL,2 Rue due Nouveau Bercy,\"\",\"\",\"\",94227,Charenton Le Pont Cedex",
-            "ARHHJTWT,[FR],FRANCE,[DM],Dispositifs médicaux,EYETECHCARE,2871 Avenue de l'Europe,\"\",\"\",\"\",69140,RILLIEUX-LA-PAPE"
+                "identifiant,pays_code,pays,secteur_activite_code,secteur,denomination_sociale,adresse_1,adresse_2,adresse_3,adresse_4,code_postal,ville",
+                "XSQKIAGK,[FR],FRANCE,[DM],Dispositifs médicaux,Cook France SARL,2 Rue due Nouveau Bercy,\"\",\"\",\"\",94227,Charenton Le Pont Cedex",
+                "ARHHJTWT,[FR],FRANCE,[DM],Dispositifs médicaux,EYETECHCARE,2871 Avenue de l'Europe,\"\",\"\",\"\",69140,RILLIEUX-LA-PAPE"
         ))
     }
 
@@ -67,7 +68,7 @@ class MainKtTest {
 
         db.graphDatabaseService.execute("MATCH (c:Company) RETURN COUNT(c) AS count").use {
             val counts = it.columnAs<Long>("count").stream().collect(Collectors.toList())
-            assertThat(counts)
+            Assertions.assertThat(counts)
                     .overridingErrorMessage("Expected 2 companies to be imported from this dump")
                     .containsExactly(2)
         }

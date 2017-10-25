@@ -15,51 +15,22 @@
  */
 package io.github.fbiville.neo4j
 
+
 import com.beust.jcommander.JCommander
-
-
-import com.beust.jcommander.Parameter
-import com.beust.jcommander.Parameters
-import java.io.BufferedReader
-import java.io.FileReader
-
-interface ImportCommand {
-    fun performImport()
-}
-
-@Parameters(commandDescription = "Imports companies into Neo4j")
-class CompanyImportCommand : ImportCommand {
-
-    @Parameter(names = arrayOf("-f", "--defined-in"), required = true, description = "Path to CSV file")
-    lateinit var csvFile: String
-
-    @Parameter(names = arrayOf("-b", "--to-graph"), required = true, description = "Neo4j Bolt URI")
-    lateinit var boltUri: String
-
-    @Parameter(names = arrayOf("-u", "--username"), description = "Neo4j username")
-    var username: String? = null
-
-    @Parameter(names = arrayOf("-p", "--password"), password = true, description = "Neo4j password")
-    var password: String? = null
-
-    @Parameter(names = arrayOf("-s", "--batch-size"), description = "Advanced: batch size")
-    var batchSize: Int = 500
-
-    override fun performImport() {
-        val importer = CompanyImporter(boltUri, username, password)
-        importer.import(BufferedReader(FileReader(csvFile)), batchSize)
-    }
-}
+import io.github.fbiville.neo4j.companies.CompanyImportCommand
+import io.github.fbiville.neo4j.drugs.DrugImportCommand
 
 fun main(args: Array<String>) {
-    val main = parseArguments(args)
+    val main = parseCommand(args)
     main.performImport()
 }
 
-private fun parseArguments(args: Array<String>): ImportCommand {
+private fun parseCommand(args: Array<String>): ImportCommand {
     val companyImportCommand = CompanyImportCommand()
+    val drugImportCommand = DrugImportCommand()
     val commandParser = JCommander.newBuilder()
             .addCommand("companies", companyImportCommand)
+            .addCommand("drugs", drugImportCommand)
             .build()
 
     commandParser.parse(*args)
@@ -67,6 +38,7 @@ private fun parseArguments(args: Array<String>): ImportCommand {
     val parsedCommand = commandParser.parsedCommand
     return when (parsedCommand) {
         "companies" -> companyImportCommand
+        "drugs" -> drugImportCommand
         else -> throw IllegalArgumentException("Unsupported command: $parsedCommand")
     }
 }

@@ -5,7 +5,7 @@
 
 ## Import example
 
-### Labs
+### First: Labs
 
 ```
  $> java -jar import/target/import.jar companies --defined-in ~/path/to/entreprise_xxx.csv \
@@ -15,3 +15,12 @@
  Neo4j password:
 ```
 
+### Second: Drugs
+
+```
+ $> java -jar import/target/import.jar drugs --defined-in ~/path/to/CIS_bdpm.txt \
+                                             --to-graph bolt://localhost:7687 \
+                                             --username neo4j \
+                                             --password
+ Neo4j password:
+```

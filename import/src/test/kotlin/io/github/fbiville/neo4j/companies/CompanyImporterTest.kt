@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.fbiville.neo4j
+package io.github.fbiville.neo4j.companies
 
+import io.github.fbiville.neo4j.CommitCounter
+import io.github.fbiville.neo4j.Readers.newReader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
@@ -22,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
-import java.io.InputStreamReader
 
 class CompanyImporterTest {
 
@@ -50,7 +51,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports countries of companies`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -69,7 +70,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports cities`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -94,7 +95,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports city|country links`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -119,7 +120,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports addresses`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -144,7 +145,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports address|city links`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -208,7 +209,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports business segments`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -231,7 +232,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports companies`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -259,7 +260,7 @@ class CompanyImporterTest {
 
     @Test
     fun `imports address|company|business segment`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it)
         }
 
@@ -323,7 +324,7 @@ class CompanyImporterTest {
 
     @Test
     fun `batches commits`() {
-        read("/companies.csv").use {
+        newReader("/companies.csv").use {
             subject.import(it, 2)
         }
 
@@ -333,6 +334,4 @@ class CompanyImporterTest {
     }
 
     private fun row(name: String, attributes: Map<String, String>) = mapOf(Pair(name, attributes))
-
-    private fun read(path: String) = InputStreamReader(this::class.java.getResourceAsStream(path))
 }
