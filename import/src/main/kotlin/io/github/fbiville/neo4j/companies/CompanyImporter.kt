@@ -49,6 +49,9 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
                         }
                     }
         }
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
     }
 
     private fun streamRows(rows: Stream<String>): Stream<Map<String, String>> {
@@ -58,8 +61,8 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
                     Pair("company_id", fields[0].toUpperCase(Environment.locale)),
                     Pair("country_code", fields[1].toUpperCase(Environment.locale)),
                     Pair("country_name", fields[2].toUpperCase(Environment.locale)),
-                    Pair("sector_code", fields[3].toUpperCase(Environment.locale)),
-                    Pair("sector_label", fields[4].toUpperCase(Environment.locale)),
+                    Pair("segment_code", fields[3].toUpperCase(Environment.locale)),
+                    Pair("segment_label", fields[4].toUpperCase(Environment.locale)),
                     Pair("company_name", fields[5].toUpperCase(Environment.locale)),
                     Pair("address", mergeAddress(
                             fields[6],
@@ -80,11 +83,24 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
             |MERGE (city)-[:LOCATED_IN_COUNTRY]->(country)
             |MERGE (address:Address {address: row.address})
             |MERGE (address)-[:LOCATED_IN_CITY {zipcode: row.zipcode}]->(city)
-            |MERGE (segment: BusinessSegment {code: row.sector_code, label: row.sector_label})
-            |MERGE (company: Company {identifier: row.company_id, name: row.company_name})
+            |MERGE (segment:BusinessSegment {code: row.segment_code, label: row.segment_label})
+            |MERGE (company:Company {identifier: row.company_id, name: row.company_name})
             |MERGE (company)-[:IN_BUSINESS_SEGMENT]->(segment)
             |MERGE (company)-[:LOCATED_AT_ADDRESS]->(address)
             |RETURN true""".trimMargin(), mapOf(Pair("rows", rows)))
+    }
+
+    private fun createIndices(session: Session) {
+        session.beginTransaction().use {
+            it.run("CREATE INDEX ON :Country(name)")
+            it.run("CREATE CONSTRAINT ON (c:Country) ASSERT c.code IS UNIQUE")
+            it.run("CREATE INDEX ON :City(name)")
+            it.run("CREATE INDEX ON :BusinessSegment(name)")
+            it.run("CREATE CONSTRAINT ON (b:BusinessSegment) ASSERT b.code IS UNIQUE")
+            it.run("CREATE INDEX ON :Company(name)")
+            it.run("CREATE CONSTRAINT ON (c:Company) ASSERT c.identifier IS UNIQUE")
+            it.success()
+        }
     }
 
     private fun mergeAddress(addressFirstPart: String, addressSecondPart: String, addressThirdPart: String, addressFourthPart: String): String {

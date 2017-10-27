@@ -18,10 +18,13 @@ package io.github.fbiville.neo4j.companies
 import io.github.fbiville.neo4j.CommitCounter
 import io.github.fbiville.neo4j.Readers.newReader
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import org.neo4j.graphdb.Label
+import org.neo4j.graphdb.schema.IndexDefinition
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
 
@@ -331,6 +334,72 @@ class CompanyImporterTest {
         assertThat(commitCounter.getCount())
                 .overridingErrorMessage("Expected 5 batched commits.")
                 .isEqualTo(5)
+    }
+
+    @Test
+    fun `creates indices for country`() {
+        newReader("/companies.csv").use {
+            subject.import(it)
+        }
+
+        val countryLabel = Label.label("Country")
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(countryLabel, listOf("name"), false),
+                            Tuple.tuple(countryLabel, listOf("code"), true)
+                    )
+        }
+    }
+
+    @Test
+    fun `creates indices for city`() {
+        newReader("/companies.csv").use {
+            subject.import(it)
+        }
+
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(Label.label("City"), listOf("name"), false)
+                    )
+        }
+    }
+
+    @Test
+    fun `creates indices for business segment`() {
+        newReader("/companies.csv").use {
+            subject.import(it)
+        }
+
+        val businessSegmentLabel = Label.label("BusinessSegment")
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(businessSegmentLabel, listOf("name"), false),
+                            Tuple.tuple(businessSegmentLabel, listOf("code"), true)
+                    )
+        }
+    }
+
+    @Test
+    fun `creates indices for companies`() {
+        newReader("/companies.csv").use {
+            subject.import(it)
+        }
+
+        val companyLabel = Label.label("Company")
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(companyLabel, listOf("name"), false),
+                            Tuple.tuple(companyLabel, listOf("identifier"), true)
+                    )
+        }
     }
 
     private fun row(name: String, attributes: Map<String, String>) = mapOf(Pair(name, attributes))

@@ -48,6 +48,9 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
                         }
                     }
         }
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
     }
 
     private fun streamRows(rows: Stream<String>): Stream<Map<String, Any>> {
@@ -80,6 +83,15 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
             )
             RETURN true
         """.trimIndent(), mapOf(Pair("rows", rows), Pair("threshold", labNameSimilarity)))
+    }
+
+    private fun createIndices(session: Session) {
+        session.beginTransaction().use {
+            it.run("CREATE INDEX ON :Drug(name)")
+            it.run("CREATE CONSTRAINT ON (d:Drug) ASSERT d.cisCode IS UNIQUE")
+            it.run("CREATE INDEX ON :Ansm(name)")
+            it.success()
+        }
     }
 
 }

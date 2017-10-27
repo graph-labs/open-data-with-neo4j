@@ -19,10 +19,12 @@ import io.github.fbiville.neo4j.CommitCounter
 import io.github.fbiville.neo4j.Readers.newReader
 import io.github.fbiville.neo4j.StringSimilarityFunction
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import org.neo4j.graphdb.Label
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
 import java.io.StringReader
@@ -203,5 +205,37 @@ class DrugImporterTest {
         assertThat(commitCounter.getCount())
                 .overridingErrorMessage("Expected 2 batched commits.")
                 .isEqualTo(2)
+    }
+
+    @Test
+    fun `creates indices for drugs`() {
+        newReader("/drugs.tsv").use {
+            subject.import(it)
+        }
+
+        val drugLabel = Label.label("Drug")
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(drugLabel, listOf("name"), false),
+                            Tuple.tuple(drugLabel, listOf("cisCode"), true)
+                    )
+        }
+    }
+
+    @Test
+    fun `creates indices for ANSM unmatched companies`() {
+        newReader("/drugs.tsv").use {
+            subject.import(it)
+        }
+
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(Label.label("Ansm"), listOf("name"), false)
+                    )
+        }
     }
 }

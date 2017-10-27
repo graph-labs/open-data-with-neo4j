@@ -48,6 +48,9 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
                         }
                     }
         }
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
     }
 
     private fun streamRows(rows: Stream<String>): Stream<Map<String, Any>> {
@@ -66,9 +69,18 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
         return session.run("""
             |UNWIND {rows} AS row
             |MERGE (drug:Drug {cisCode: row.cisCode})
-            |ON CREATE SET drug:FromPackage
+            |ON CREATE SET drug:DrugFromPackage
             |MERGE (package :Package {name: row.packageName, cip13Code: row.cip13Code})
             |MERGE (package)<-[:DRUG_PACKAGED_AS]-(drug)
             |RETURN true""".trimMargin(), mapOf(Pair("rows", rows)))
+    }
+
+    private fun createIndices(session: Session) {
+        session.beginTransaction().use {
+            it.run("CREATE INDEX ON :Package(name)")
+            it.run("CREATE CONSTRAINT ON (p:Package) ASSERT p.cip13Code IS UNIQUE")
+            it.run("CREATE CONSTRAINT ON (d:DrugFromPackage) ASSERT d.cisCode IS UNIQUE")
+            it.success()
+        }
     }
 }

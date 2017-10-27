@@ -18,10 +18,12 @@ package io.github.fbiville.neo4j.packages
 import io.github.fbiville.neo4j.CommitCounter
 import io.github.fbiville.neo4j.Readers.newReader
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import org.neo4j.graphdb.Label
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
 
@@ -88,5 +90,37 @@ class PackageImporterTest {
             )
         }
         assertThat(commitCounter.getCount()).isEqualTo(1)
+    }
+
+    @Test
+    fun `creates indices for packages`() {
+        newReader("/packages.tsv").use {
+            subject.import(it)
+        }
+
+        val packageLabel = Label.label("Package")
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(packageLabel, listOf("name"), false),
+                            Tuple.tuple(packageLabel, listOf("cip13Code"), true)
+                    )
+        }
+    }
+
+    @Test
+    fun `creates indices for unmatched drugs`() {
+        newReader("/packages.tsv").use {
+            subject.import(it)
+        }
+
+        graphDb.graphDatabaseService.beginTx().use {
+            assertThat(graphDb.graphDatabaseService.schema().indexes)
+                    .extracting("label", "propertyKeys", "constraintIndex")
+                    .contains(
+                            Tuple.tuple(Label.label("DrugFromPackage"), listOf("cisCode"), true)
+                    )
+        }
     }
 }
