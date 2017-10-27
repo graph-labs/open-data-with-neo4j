@@ -19,6 +19,7 @@ package io.github.fbiville.neo4j
 import com.beust.jcommander.JCommander
 import io.github.fbiville.neo4j.companies.CompanyImportCommand
 import io.github.fbiville.neo4j.drugs.DrugImportCommand
+import io.github.fbiville.neo4j.packages.PackageImportCommand
 
 fun main(args: Array<String>) {
     val main = parseCommand(args)
@@ -28,8 +29,10 @@ fun main(args: Array<String>) {
 private fun parseCommand(args: Array<String>): ImportCommand {
     val companyImportCommand = CompanyImportCommand()
     val drugImportCommand = DrugImportCommand()
+    val packageImportCommand = PackageImportCommand()
     val commandParser = JCommander.newBuilder()
             .addCommand("companies", companyImportCommand)
+            .addCommand("packages", packageImportCommand)
             .addCommand("drugs", drugImportCommand)
             .build()
 
@@ -39,6 +42,8 @@ private fun parseCommand(args: Array<String>): ImportCommand {
     return when (parsedCommand) {
         "companies" -> companyImportCommand
         "drugs" -> drugImportCommand
+        "packages" -> packageImportCommand
         else -> throw IllegalArgumentException("Unsupported command: $parsedCommand")
     }
 }
+

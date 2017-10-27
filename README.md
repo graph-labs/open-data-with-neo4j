@@ -24,3 +24,13 @@
                                              --password
  Neo4j password:
 ```
+
+### Third: packages
+
+```
+ $> java -jar import/target/import.jar packages --defined-in ~/path/to/CIS_CIP_bdpm.txt \
+                                                --to-graph bolt://localhost:7687 \
+                                                --username neo4j \
+                                                --password
+ Neo4j password:
+```
