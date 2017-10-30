@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>fr.graphlabs.neo4j</groupId>
-        <artifactId>open-data</artifactId>
+        <artifactId>open-data-with-neo4j-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
