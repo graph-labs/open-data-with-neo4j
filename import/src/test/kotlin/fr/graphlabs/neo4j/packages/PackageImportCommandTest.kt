@@ -51,10 +51,10 @@ class PackageImportCommandTest {
     fun prepare() {
         tsvFile = file.newFile().toPath()
         Files.write(tsvFile, listOf(
-            "60002283\t4949729\tplaquette(s) PVC PVDC aluminium de 30 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t16/03/2011\t3400949497294\toui\t100%\t44,38\t45,40\t1,02",
-            "60002283\t4949770\tplaquette(s) PVC PVDC aluminium de 90 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t19/09/2011\t3400949497706\toui\t100%\t120,04\t121,06\t1,02",
-            "60002504\t3320863\ttube(s) polypropylène de 30 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t03/12/2003\t3400933208639\toui\t15%\t7,75\t8,77\t1,02",
-            "60003620\t3696350\t20 récipient(s) unidose(s) polyéthylène de 2 ml suremballée(s)/surpochée(s) par plaquette de 5 récipients unidoses\tPrésentation active\tDéclaration de commercialisation\t30/11/2006\t3400936963504\toui\t65%\t38,11\t39,13\t1,02"
+            "60002283\t4949729\tplaquette(s) PVC PVDC aluminium de 30 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t16/03/2011\t3400949497294\toui\t100%\t44,38\t45,40\t1,02\t",
+            "60002283\t4949770\tplaquette(s) PVC PVDC aluminium de 90 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t19/09/2011\t3400949497706\toui\t100%\t120,04\t121,06\t1,02\t",
+            "60002504\t3320863\ttube(s) polypropylène de 30 comprimé(s)\tPrésentation active\tDéclaration de commercialisation\t03/12/2003\t3400933208639\toui\t15%\t7,75\t8,77\t1,02\t",
+            "60003620\t3696350\t20 récipient(s) unidose(s) polyéthylène de 2 ml suremballée(s)/surpochée(s) par plaquette de 5 récipients unidoses\tPrésentation active\tDéclaration de commercialisation\t30/11/2006\t3400936963504\toui\t65%\t38,11\t39,13\t1,02\t"
         ))
     }
 

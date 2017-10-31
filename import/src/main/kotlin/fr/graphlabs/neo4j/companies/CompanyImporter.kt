@@ -15,14 +15,12 @@
  */
 package fr.graphlabs.neo4j.companies
 
-import fr.graphlabs.neo4j.Environment
-import fr.graphlabs.neo4j.batch
+import fr.graphlabs.neo4j.*
 import org.neo4j.driver.v1.AccessMode
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Session
 import org.neo4j.driver.v1.StatementResult
-import java.io.BufferedReader
 import java.io.Reader
 import java.util.Locale
 import java.util.stream.Stream
@@ -38,8 +36,8 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500) {
-        BufferedReader(reader).use {
-            streamRows(it.lines().skip(1))
+        reader.use {
+            streamRows(it)
                     .asSequence()
                     .batch(commitPeriod)
                     .forEach {
@@ -54,25 +52,30 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun streamRows(rows: Stream<String>): Stream<Map<String, String>> {
-        return rows.map {
-            val fields = it.split(",")
-            mapOf(
-                    Pair("company_id", fields[0].toUpperCase(Environment.locale)),
-                    Pair("country_code", fields[1].toUpperCase(Environment.locale)),
-                    Pair("country_name", fields[2].toUpperCase(Environment.locale)),
-                    Pair("segment_code", fields[3].toUpperCase(Environment.locale)),
-                    Pair("segment_label", fields[4].toUpperCase(Environment.locale)),
-                    Pair("company_name", fields[5].toUpperCase(Environment.locale)),
-                    Pair("address", mergeAddress(
-                            fields[6],
-                            fields[7],
-                            fields[8],
-                            fields[9])),
-                    Pair("zipcode", fields[10].toUpperCase(Environment.locale)),
-                    Pair("city_name", fields[11].toUpperCase(Environment.locale))
-            )
+    private fun streamRows(reader: Reader): Stream<Map<String, String>> {
+        return Streams.fromIterator(
+                CsvMapIterator(arrayOf("company_id",
+                        "country_code", "country_name",
+                        "segment_code", "segment_label",
+                        "company_name",
+                        "address_1", "address_2", "address_3", "address_4",
+                        "zipcode",
+                        "city_name"), reader
+                )
+        ).map {
+            val row = it.toMutableMap()
+            joinAddress(row, it)
+            row.setValuesUpperCase(Locale.FRENCH)
+            row
         }
+    }
+
+    private fun joinAddress(row: MutableMap<String, String>, it: Map<String, String>) {
+        row["address"] = mergeAddress(it["address_1"], it["address_2"], it["address_3"], it["address_4"])
+        row.remove("address_1")
+        row.remove("address_2")
+        row.remove("address_3")
+        row.remove("address_4")
     }
 
     private fun upsertCompanyGraph(session: Session, rows: List<Map<String, String>>): StatementResult? {
@@ -103,20 +106,20 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun mergeAddress(addressFirstPart: String, addressSecondPart: String, addressThirdPart: String, addressFourthPart: String): String {
+    private fun mergeAddress(addressFirstPart: String?, addressSecondPart: String?, addressThirdPart: String?, addressFourthPart: String?): String {
         var builder = StringBuilder()
-        builder = builder.append(addressFirstPart.toUpperCase(Environment.locale))
-        builder = appendNotBlank(addressSecondPart, builder)
-        builder = appendNotBlank(addressThirdPart, builder)
-        builder = appendNotBlank(addressFourthPart, builder)
+        builder = builder.append(addressFirstPart.orEmpty().toUpperCase(Environment.locale))
+        builder = appendNotBlank(addressSecondPart.orEmpty(), builder)
+        builder = appendNotBlank(addressThirdPart.orEmpty(), builder)
+        builder = appendNotBlank(addressFourthPart.orEmpty(), builder)
         return builder.toString()
     }
 
     private fun appendNotBlank(part: String, builder: StringBuilder): StringBuilder {
-        return if (part != "\"\"") {
-            builder.append("\n").append(part.toUpperCase(Locale.FRENCH))
-        } else {
+        return if (part.isBlank() || part == "\"\"") {
             builder
+        } else {
+            builder.append("\n").append(part.toUpperCase(Locale.FRENCH))
         }
     }
 

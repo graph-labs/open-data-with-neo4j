@@ -20,10 +20,7 @@ import fr.graphlabs.neo4j.Readers.newReader
 import fr.graphlabs.neo4j.StringSimilarityFunction
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.neo4j.graphdb.Label
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler

@@ -15,11 +15,28 @@
  */
 package fr.graphlabs.neo4j
 
-import org.springframework.boot.SpringApplication;
+import org.neo4j.driver.v1.AuthTokens
+import org.neo4j.driver.v1.Driver
+import org.neo4j.driver.v1.GraphDatabase
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.context.annotation.Bean
+import java.net.URI
 
 @SpringBootApplication
-class Main
+class Main {
+    @Bean
+    fun driver(@Value("\${neo4j.address:'bolt://localhost'}") address: String,
+               @Value("\${neo4j.user:'neo4j'}") username: String,
+               @Value("\${neo4j.password}") password: String): Driver {
+
+        return GraphDatabase.driver(
+                URI.create(address),
+                AuthTokens.basic(username, password)
+        )
+    }
+}
 
 fun main(args: Array<String>) {
     SpringApplication.run(Main::class.java, *args)

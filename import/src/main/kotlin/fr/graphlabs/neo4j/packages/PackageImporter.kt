@@ -15,15 +15,15 @@
  */
 package fr.graphlabs.neo4j.packages
 
-import fr.graphlabs.neo4j.Environment
-import fr.graphlabs.neo4j.batch
+import fr.graphlabs.neo4j.*
 import org.neo4j.driver.v1.AccessMode
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Session
 import org.neo4j.driver.v1.StatementResult
-import java.io.BufferedReader
+import org.supercsv.prefs.CsvPreference
 import java.io.Reader
+import java.util.*
 import java.util.stream.Stream
 import kotlin.streams.asSequence
 
@@ -37,8 +37,8 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500) {
-        BufferedReader(reader).use {
-            streamRows(it.lines())
+        reader.use {
+            streamRows(it)
                     .asSequence()
                     .batch(commitPeriod)
                     .forEach {
@@ -53,15 +53,19 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun streamRows(rows: Stream<String>): Stream<Map<String, Any>> {
-        return rows
+    private fun streamRows(reader: Reader): Stream<Map<String, Any>> {
+        val stream = Streams.fromIterator(CsvMapIterator(arrayOf(
+                "cisCode", null,
+                "packageName", null, null, null, "cip13Code",
+                null, null, null,
+                null, null, null
+        ), reader, skipHeader = false, prefs = CsvPreference.Builder('£', '\t'.toInt(), "\n").build()))
+
+        return stream
                 .map {
-                    val fields = it.split("\t")
-                    mapOf(
-                            Pair("cisCode", fields[0].trim().toUpperCase(Environment.locale)),
-                            Pair("packageName", fields[2].trim().toUpperCase(Environment.locale)),
-                            Pair("cip13Code", fields[6].trim().toUpperCase(Environment.locale))
-                    )
+                    val rows = it.toMutableMap()
+                    rows.setValuesUpperCase(Locale.FRENCH)
+                    rows
                 }
     }
 
