@@ -15,6 +15,7 @@
     <properties>
         <junit.version>4.12</junit.version>
         <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
+        <working.jetty.version.for.harness>9.2.9.v20150224</working.jetty.version.for.harness>
     </properties>
 
     <dependencyManagement>
@@ -26,6 +27,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+             <dependency>
+                 <groupId>org.eclipse.jetty</groupId>
+                 <artifactId>jetty-server</artifactId>
+                 <version>${working.jetty.version.for.harness}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.eclipse.jetty</groupId>
+                 <artifactId>jetty-servlet</artifactId>
+                 <version>${working.jetty.version.for.harness}</version>
+             </dependency>
+             <dependency>
+                 <groupId>org.eclipse.jetty</groupId>
+                 <artifactId>jetty-http</artifactId>
+                 <version>${working.jetty.version.for.harness}</version>
+             </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -40,11 +56,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-neo4j</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.4.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -52,9 +69,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>similarity-extension</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.nhaarman</groupId>
+            <artifactId>mockito-kotlin</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+            <version>${neo4j.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -73,7 +101,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>${start-class}</mainClass>
+                    <mainClass>fr.graphlabs.neo4j.MainKt</mainClass>
                 </configuration>
             </plugin>
             <plugin>

@@ -129,6 +129,7 @@
                     <excludes>
                         <exclude>**/*.csv</exclude>
                         <exclude>**/*.tsv</exclude>
+                        <exclude>**/*.txt</exclude>
                     </excludes>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>

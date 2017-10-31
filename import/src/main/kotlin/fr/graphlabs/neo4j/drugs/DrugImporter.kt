@@ -15,15 +15,15 @@
  */
 package fr.graphlabs.neo4j.drugs
 
-import fr.graphlabs.neo4j.Environment
-import fr.graphlabs.neo4j.batch
+import fr.graphlabs.neo4j.*
 import org.neo4j.driver.v1.AccessMode
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Session
 import org.neo4j.driver.v1.StatementResult
-import java.io.BufferedReader
+import org.supercsv.prefs.CsvPreference
 import java.io.Reader
+import java.util.*
 import java.util.stream.Stream
 import kotlin.streams.asSequence
 
@@ -37,8 +37,8 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500, labNameSimilarity: Double = 0.8) {
-        BufferedReader(reader).use {
-            streamRows(it.lines())
+        reader.use {
+            streamRows(it)
                     .asSequence()
                     .batch(commitPeriod)
                     .forEach {
@@ -53,15 +53,22 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
         }
     }
 
-    private fun streamRows(rows: Stream<String>): Stream<Map<String, Any>> {
-        return rows
+    private fun streamRows(reader: Reader): Stream<Map<String, Any>> {
+        val stream = Streams.fromIterator(CsvMapIterator(arrayOf(
+                "cisCode", "drugName",
+                null, null, null, null, null,
+                null, null, null,
+                "labNames",
+                null
+        ), reader, skipHeader = false, prefs = CsvPreference.TAB_PREFERENCE))
+
+        return stream
                 .map {
-                    val fields = it.split("\t")
-                    mapOf(
-                            Pair("cisCode", fields[0].trim().toUpperCase(Environment.locale)),
-                            Pair("drugName", fields[1].trim().toUpperCase(Environment.locale)),
-                            Pair("labNames", fields[10].toUpperCase(Environment.locale).split(";").map { it.trim() })
-                    )
+                    val rows = it.toMutableMap()
+                    rows.setValuesUpperCase(Locale.FRENCH)
+                    val result = rows as MutableMap<String, Any>
+                    result["labNames"] = rows["labNames"]!!.split(";").map { it.trim() }.toTypedArray()
+                    result
                 }
     }
 
