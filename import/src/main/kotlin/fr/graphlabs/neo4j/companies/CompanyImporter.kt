@@ -16,13 +16,13 @@
 package fr.graphlabs.neo4j.companies
 
 import fr.graphlabs.neo4j.*
-import org.neo4j.driver.v1.AccessMode
-import org.neo4j.driver.v1.AuthTokens
-import org.neo4j.driver.v1.GraphDatabase
-import org.neo4j.driver.v1.Session
-import org.neo4j.driver.v1.StatementResult
+import fr.graphlabs.neo4j.agnostic.collections.Streams
+import fr.graphlabs.neo4j.agnostic.collections.batch
+import fr.graphlabs.neo4j.agnostic.collections.setValuesUpperCase
+import fr.graphlabs.neo4j.agnostic.csv.CsvMapIterator
+import org.neo4j.driver.v1.*
 import java.io.Reader
-import java.util.Locale
+import java.util.*
 import java.util.stream.Stream
 import kotlin.streams.asSequence
 
@@ -52,7 +52,7 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun streamRows(reader: Reader): Stream<Map<String, String>> {
+    private fun streamRows(reader: Reader): Stream<Row> {
         return Streams.fromIterator(
                 CsvMapIterator(arrayOf("company_id",
                         "country_code", "country_name",
@@ -63,14 +63,15 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
                         "city_name"), reader
                 )
         ).map {
-            val row = it.toMutableMap()
+            @Suppress("UNCHECKED_CAST")
+            val row = it.toMutableMap() as MutableRow
             joinAddress(row, it)
             row.setValuesUpperCase(Locale.FRENCH)
             row
         }
     }
 
-    private fun joinAddress(row: MutableMap<String, String>, it: Map<String, String>) {
+    private fun joinAddress(row: MutableRow, it: Row) {
         row["address"] = mergeAddress(it["address_1"], it["address_2"], it["address_3"], it["address_4"])
         row.remove("address_1")
         row.remove("address_2")
@@ -78,7 +79,7 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
         row.remove("address_4")
     }
 
-    private fun upsertCompanyGraph(session: Session, rows: List<Map<String, String>>): StatementResult? {
+    private fun upsertCompanyGraph(session: Session, rows: List<Row>): StatementResult? {
         return session.run("""
             |UNWIND {rows} AS row
             |MERGE (country:Country {code: row.country_code, name: row.country_name})
@@ -106,12 +107,12 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun mergeAddress(addressFirstPart: String?, addressSecondPart: String?, addressThirdPart: String?, addressFourthPart: String?): String {
+    private fun mergeAddress(addressFirstPart: Any?, addressSecondPart: Any?, addressThirdPart: Any?, addressFourthPart: Any?): String {
         var builder = StringBuilder()
-        builder = builder.append(addressFirstPart.orEmpty().toUpperCase(Environment.locale))
-        builder = appendNotBlank(addressSecondPart.orEmpty(), builder)
-        builder = appendNotBlank(addressThirdPart.orEmpty(), builder)
-        builder = appendNotBlank(addressFourthPart.orEmpty(), builder)
+        builder = builder.append(addressFirstPart?.toString() ?: "".toUpperCase(Environment.locale))
+        builder = appendNotBlank(addressSecondPart?.toString() ?: "", builder)
+        builder = appendNotBlank(addressThirdPart?.toString() ?: "", builder)
+        builder = appendNotBlank(addressFourthPart?.toString() ?: "", builder)
         return builder.toString()
     }
 

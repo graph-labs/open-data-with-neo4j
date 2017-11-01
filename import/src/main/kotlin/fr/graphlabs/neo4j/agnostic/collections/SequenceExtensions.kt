@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.graphlabs.neo4j
+package fr.graphlabs.neo4j.agnostic.collections
 
-import java.util.*
-import java.util.stream.Stream
-import java.util.stream.StreamSupport
+fun <T> Sequence<T>.batch(n: Int): Sequence<List<T>> {
+    return BatchingSequence(this, n)
+}
 
-object Streams {
+private class BatchingSequence<out T>(val source: Sequence<T>, val batchSize: Int) : Sequence<List<T>> {
 
-    fun <T>fromIterator(iterator: Iterator<T>): Stream<T> {
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED),
-                false)
+    override fun iterator(): Iterator<List<T>> = object : AbstractIterator<List<T>>() {
+        val iterate =
+                if (batchSize > 0) source.iterator()
+                else emptyList<T>().iterator()
+
+        override fun computeNext() {
+            if (iterate.hasNext()) setNext(iterate.asSequence().take(batchSize).toList())
+            else done()
+        }
     }
 }

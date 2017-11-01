@@ -17,10 +17,12 @@ package fr.graphlabs.neo4j.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.harness.junit.Neo4jRule
+import org.slf4j.bridge.SLF4JBridgeHandler
 
 class LabsRepositoryTest {
 
@@ -32,6 +34,14 @@ class LabsRepositoryTest {
     @Before
     fun prepare() {
         subject = LabsRepository(GraphDatabase.driver(neo4j.boltURI()))
+    }
+
+    companion object {
+        @JvmStatic
+        @BeforeClass
+        fun prepareAll() {
+            SLF4JBridgeHandler.removeHandlersForRootLogger()
+        }
     }
 
     @Test

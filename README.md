@@ -33,7 +33,7 @@ Then, convert the file to UTF-8:
 
 Then, execute the import:
 ```
- $> java -jar import/target/import.jar drugs --defined-in ~/path/to/CIS_bdpm.txt \
+ $> java -jar import/target/import.jar drugs --defined-in ~/path/to/CIS_bdpm.utf8.txt \
                                              --to-graph bolt://localhost:7687 \
                                              --username neo4j \
                                              --password
@@ -42,7 +42,6 @@ Then, execute the import:
 
 ### Third: packages
 
-
 First, convert the file to UTF-8:
 
 ```
@@ -50,7 +49,17 @@ First, convert the file to UTF-8:
 ```
 
 ```
- $> java -jar import/target/import.jar packages --defined-in ~/path/to/CIS_CIP_bdpm.txt \
+ $> java -jar import/target/import.jar packages --defined-in ~/path/to/CIS_CIP_bdpm.utf8.txt \
+                                                --to-graph bolt://localhost:7687 \
+                                                --username neo4j \
+                                                --password
+ Neo4j password:
+```
+
+### Fourth: benefits
+
+```
+ $> java -jar import/target/import.jar benefits --defined-in ~/path/to/declaration_avantage_XXX.csv \
                                                 --to-graph bolt://localhost:7687 \
                                                 --username neo4j \
                                                 --password
