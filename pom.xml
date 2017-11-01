@@ -95,6 +95,7 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
                 <configuration>
+                    <args><arg>-Xskip-runtime-version-check</arg></args>
                     <jvmTarget>${maven.compiler.source}</jvmTarget>
                 </configuration>
                 <executions>

@@ -17,6 +17,7 @@ package fr.graphlabs.neo4j.labs
 
 import org.neo4j.driver.v1.AccessMode
 import org.neo4j.driver.v1.Driver
+import org.neo4j.driver.v1.Record
 import org.neo4j.driver.v1.Value
 import org.springframework.stereotype.Repository
 
@@ -32,44 +33,46 @@ class LabsRepository(private val driver: Driver) {
                                (city)-[:LOCATED_IN_COUNTRY]->(country:Country)
                 RETURN lab {.identifier, .name},
                        segment {.code, .label},
-                       address {.address},
+                       address {.toAddress},
                        cityLoc {.zipcode},
                        city {.name},
                        country {.code, .name}
                 ORDER BY lab.identifier ASC""".trimIndent(), mapOf(Pair("name", drugPackage)))
 
-            return result.list().map {
-                val labData = it["lab"].asMap()
-                val segmentData = asNullableMap(it["segment"])
-                val addressData = asNullableMap(it["address"])
-                val cityLocData = asNullableMap(it["cityLoc"])
-                val cityData = asNullableMap(it["city"])
-                val countryData = asNullableMap(it["country"])
-                if (segmentData == null
-                        || addressData == null
-                        || cityLocData == null
-                        || cityData == null
-                        || countryData == null) {
-                    Lab(labData["identifier"].toString(), labData["name"].toString())
-                } else {
-                    val country = country(countryData)
-                    val city = city(cityData, country)
-                    Lab(labData["identifier"].toString(),
-                        labData["name"].toString(),
-                        businessSegment(segmentData),
-                        address(addressData, cityLocData, city)
-                    )
-                }
-            }
+            return result.list().map(this::toLab)
         }
     }
 
-    private fun businessSegment(segmentData: Map<String, Any>) =
+    private fun toLab(it: Record): Lab {
+        val labData = it["lab"].asMap()
+        val segmentData = asNullableMap(it["segment"])
+        val addressData = asNullableMap(it["address"])
+        val cityLocData = asNullableMap(it["cityLoc"])
+        val cityData = asNullableMap(it["city"])
+        val countryData = asNullableMap(it["country"])
+        return if (segmentData == null
+                || addressData == null
+                || cityLocData == null
+                || cityData == null
+                || countryData == null) {
+            Lab(labData["identifier"].toString(), labData["name"].toString())
+        } else {
+            val country = toCountry(countryData)
+            val city = toCity(cityData, country)
+            Lab(labData["identifier"].toString(),
+                    labData["name"].toString(),
+                    toBusinessSegment(segmentData),
+                    toAddress(addressData, cityLocData, city)
+            )
+        }
+    }
+
+    private fun toBusinessSegment(segmentData: Map<String, Any>) =
             BusinessSegment(segmentData["code"].toString(), segmentData["label"].toString())
 
-    private fun address(addressData: Map<String, Any>,
-                        cityLocData: Map<String, Any>,
-                        city: City): Address {
+    private fun toAddress(addressData: Map<String, Any>,
+                          cityLocData: Map<String, Any>,
+                          city: City): Address {
 
         return Address(
                 addressData["address"].toString(),
@@ -78,14 +81,14 @@ class LabsRepository(private val driver: Driver) {
         )
     }
 
-    private fun city(cityData: Map<String, Any>, country: Country): City {
+    private fun toCity(cityData: Map<String, Any>, country: Country): City {
         return City(
                 cityData["name"].toString(),
                 country
         )
     }
 
-    private fun country(countryData: Map<String, Any>): Country {
+    private fun toCountry(countryData: Map<String, Any>): Country {
         return Country(
                 countryData["code"].toString(),
                 countryData["name"].toString()

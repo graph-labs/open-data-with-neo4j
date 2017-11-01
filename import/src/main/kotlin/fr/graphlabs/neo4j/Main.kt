@@ -15,7 +15,6 @@
  */
 package fr.graphlabs.neo4j
 
-
 import com.beust.jcommander.JCommander
 import fr.graphlabs.neo4j.benefits.BenefitImportCommand
 import fr.graphlabs.neo4j.companies.CompanyImportCommand
@@ -28,26 +27,30 @@ fun main(args: Array<String>) {
 }
 
 private fun parseCommand(args: Array<String>): ImportCommand {
-    val companyImportCommand = CompanyImportCommand()
-    val drugImportCommand = DrugImportCommand()
-    val packageImportCommand = PackageImportCommand()
-    val benefitImportCommand = BenefitImportCommand()
-    val commandParser = JCommander.newBuilder()
-            .addCommand("companies", companyImportCommand)
-            .addCommand("packages", packageImportCommand)
-            .addCommand("benefits", benefitImportCommand)
-            .addCommand("drugs", drugImportCommand)
-            .build()
 
-    commandParser.parse(*args)
+    val commands = mapOf<String, ImportCommand>(
+            Pair("companies", CompanyImportCommand()),
+            Pair("packages", PackageImportCommand()),
+            Pair("benefits", BenefitImportCommand()),
+            Pair("drugs", DrugImportCommand())
+    )
 
-    val parsedCommand = commandParser.parsedCommand
+    val parsedCommand = parseCommand(commandParser(commands), args)
     return when (parsedCommand) {
-        "companies" -> companyImportCommand
-        "drugs" -> drugImportCommand
-        "packages" -> packageImportCommand
-        "benefits" -> benefitImportCommand
+        in commands.keys -> commands[parsedCommand]!!
         else -> throw IllegalArgumentException("Unsupported command: $parsedCommand")
     }
+}
+
+private fun parseCommand(parser: JCommander, args: Array<String>): String? {
+    parser.parse(*args)
+    val parsedCommand = parser.parsedCommand
+    return parsedCommand
+}
+
+private fun commandParser(commands: Map<String, ImportCommand>): JCommander {
+    val builder = JCommander.newBuilder()
+    commands.forEach { builder.addCommand(it.key, it.value) }
+    return builder.build()
 }
 
