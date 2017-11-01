@@ -119,7 +119,7 @@ class BenefitImporterTest {
 
         graphDb.graphDatabaseService.execute("""
             MATCH (year:Year)<-[:MONTH_IN_YEAR]-(month:Month)<-[:DAY_IN_MONTH]-(day:Day)
-            RETURN year {.year}, month {.month}, day {.day}
+            RETURN DISTINCT year {.year}, month {.month}, day {.day}
             ORDER BY year.year, month.month, day.day ASC""".trimIndent()).use {
 
             assertThat(it).containsExactly(
@@ -183,7 +183,7 @@ class BenefitImporterTest {
 
         graphDb.graphDatabaseService.execute("""
             MATCH (b:Benefit)-[:GIVEN_AT_DATE]->(day:Day)-[:DAY_IN_MONTH]->(month:Month)-[:MONTH_IN_YEAR]->(year:Year)
-            RETURN b {.amount}, day {.day}, month {.month}, year {.year}
+            RETURN DISTINCT b {.amount}, day {.day}, month {.month}, year {.year}
             ORDER BY b.amount ASC""".trimIndent()).use {
 
             assertThat(it).containsExactly(
