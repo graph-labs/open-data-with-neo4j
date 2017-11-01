@@ -17,6 +17,7 @@ package fr.graphlabs.neo4j
 
 
 import com.beust.jcommander.JCommander
+import fr.graphlabs.neo4j.benefits.BenefitImportCommand
 import fr.graphlabs.neo4j.companies.CompanyImportCommand
 import fr.graphlabs.neo4j.drugs.DrugImportCommand
 import fr.graphlabs.neo4j.packages.PackageImportCommand
@@ -30,9 +31,11 @@ private fun parseCommand(args: Array<String>): ImportCommand {
     val companyImportCommand = CompanyImportCommand()
     val drugImportCommand = DrugImportCommand()
     val packageImportCommand = PackageImportCommand()
+    val benefitImportCommand = BenefitImportCommand()
     val commandParser = JCommander.newBuilder()
             .addCommand("companies", companyImportCommand)
             .addCommand("packages", packageImportCommand)
+            .addCommand("benefits", benefitImportCommand)
             .addCommand("drugs", drugImportCommand)
             .build()
 
@@ -43,6 +46,7 @@ private fun parseCommand(args: Array<String>): ImportCommand {
         "companies" -> companyImportCommand
         "drugs" -> drugImportCommand
         "packages" -> packageImportCommand
+        "benefits" -> benefitImportCommand
         else -> throw IllegalArgumentException("Unsupported command: $parsedCommand")
     }
 }
