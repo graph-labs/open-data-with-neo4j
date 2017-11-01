@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.graphlabs.neo4j
+package fr.graphlabs.neo4j.agnostic.collections
 
-import java.util.*
+import java.util.Locale
 
-fun MutableMap<String, String>.setValuesUpperCase(locale: Locale) {
+fun MutableMap<String, Any?>.setValuesUpperCase(locale: Locale) {
     this.entries.forEach {
-        this[it.key] = it.value.toUpperCase(locale)
+        val value = it.value
+        this[it.key] = value?.toString()?.toUpperCase(locale)
     }
 }

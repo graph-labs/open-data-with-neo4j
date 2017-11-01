@@ -16,11 +16,11 @@
 package fr.graphlabs.neo4j.packages
 
 import fr.graphlabs.neo4j.*
-import org.neo4j.driver.v1.AccessMode
-import org.neo4j.driver.v1.AuthTokens
-import org.neo4j.driver.v1.GraphDatabase
-import org.neo4j.driver.v1.Session
-import org.neo4j.driver.v1.StatementResult
+import fr.graphlabs.neo4j.agnostic.collections.Streams
+import fr.graphlabs.neo4j.agnostic.collections.batch
+import fr.graphlabs.neo4j.agnostic.collections.setValuesUpperCase
+import fr.graphlabs.neo4j.agnostic.csv.CsvMapIterator
+import org.neo4j.driver.v1.*
 import org.supercsv.prefs.CsvPreference
 import java.io.Reader
 import java.util.*
@@ -53,37 +53,36 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
         }
     }
 
-    private fun streamRows(reader: Reader): Stream<Map<String, Any>> {
-        val stream = Streams.fromIterator(CsvMapIterator(arrayOf(
-                "cisCode", null,
-                "packageName", null, null, null, "cip13Code",
-                null, null, null,
-                null, null, null
-        ), reader, skipHeader = false, prefs = CsvPreference.Builder('£', '\t'.toInt(), "\n").build()))
-
-        return stream
+    private fun streamRows(reader: Reader): Stream<Row> {
+        val columns = Array<String?>(13, { null })
+        columns[0] = "cis_code"
+        columns[2] = "package_name"
+        columns[6] = "cip13_code"
+        val format = CsvPreference.Builder('£', '\t'.toInt(), "\n").build()
+        return Streams.fromIterator(CsvMapIterator(columns, reader, skipHeader = false, prefs = format))
                 .map {
-                    val rows = it.toMutableMap()
+                    @Suppress("UNCHECKED_CAST")
+                    val rows = it.toMutableMap() as MutableRow
                     rows.setValuesUpperCase(Locale.FRENCH)
                     rows
                 }
     }
 
-    private fun importPackageGraph(session: Session, rows: List<Map<String, Any>>): StatementResult {
+    private fun importPackageGraph(session: Session, rows: List<Row>): StatementResult {
         return session.run("""
-            |UNWIND {rows} AS row
-            |MERGE (drug:Drug {cisCode: row.cisCode})
-            |ON CREATE SET drug:DrugFromPackage
-            |MERGE (package :Package {name: row.packageName, cip13Code: row.cip13Code})
-            |MERGE (package)<-[:DRUG_PACKAGED_AS]-(drug)
-            |RETURN true""".trimMargin(), mapOf(Pair("rows", rows)))
+             UNWIND {rows} AS row
+             MERGE (drug:Drug {cis_code: row.cis_code})
+             ON CREATE SET drug:DrugFromPackage
+             MERGE (package :Package {name: row.package_name, cip13_code: row.cip13_code})
+             MERGE (package)<-[:DRUG_PACKAGED_AS]-(drug)
+             RETURN true""".trimIndent(), mapOf(Pair("rows", rows)))
     }
 
     private fun createIndices(session: Session) {
         session.beginTransaction().use {
             it.run("CREATE INDEX ON :Package(name)")
-            it.run("CREATE CONSTRAINT ON (p:Package) ASSERT p.cip13Code IS UNIQUE")
-            it.run("CREATE CONSTRAINT ON (d:DrugFromPackage) ASSERT d.cisCode IS UNIQUE")
+            it.run("CREATE CONSTRAINT ON (p:Package) ASSERT p.cip13_code IS UNIQUE")
+            it.run("CREATE CONSTRAINT ON (d:DrugFromPackage) ASSERT d.cis_code IS UNIQUE")
             it.success()
         }
     }

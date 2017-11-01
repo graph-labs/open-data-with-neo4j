@@ -20,12 +20,15 @@ import fr.graphlabs.neo4j.Readers.newReader
 import fr.graphlabs.neo4j.StringSimilarityFunction
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
-import org.junit.*
-import org.neo4j.graphdb.Label
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.Test
+import org.neo4j.graphdb.Label.label
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
 import java.io.StringReader
-import java.util.Locale
+import java.util.*
 
 class DrugImporterTest {
 
@@ -67,21 +70,21 @@ class DrugImporterTest {
 
         graphDb.graphDatabaseService.execute("""
             |MATCH (drug:Drug)
-            |RETURN drug {.cisCode, .name}
-            |ORDER BY drug.cisCode""".trimMargin()).use {
+            |RETURN drug {.cis_code, .name}
+            |ORDER BY drug.cis_code""".trimMargin()).use {
 
             assertThat(it).containsExactly(
                     mapOf(Pair("drug", mapOf(
-                            Pair("cisCode", "60538772"),
+                            Pair("cis_code", "60538772"),
                             Pair("name", "ABIES CANADENSIS BOIRON, DEGRÉ DE DILUTION COMPRIS ENTRE 2CH ET 30CH OU ENTRE 4DH ET 60DH")))),
                     mapOf(Pair("drug", mapOf(
-                            Pair("cisCode", "61266250"),
+                            Pair("cis_code", "61266250"),
                             Pair("name", "A 313 200 000 UI POUR CENT, POMMADE")))),
                     mapOf(Pair("drug", mapOf(
-                            Pair("cisCode", "62170486"),
+                            Pair("cis_code", "62170486"),
                             Pair("name", "ABACAVIR/LAMIVUDINE MYLAN PHARMA 600 MG/300 MG, COMPRIMÉ PELLICULÉ")))),
                     mapOf(Pair("drug", mapOf(
-                            Pair("cisCode", "62869109"),
+                            Pair("cis_code", "62869109"),
                             Pair("name", "A 313 50 000 U.I., CAPSULE MOLLE"))))
             )
         }
@@ -105,24 +108,24 @@ class DrugImporterTest {
             |MATCH (drug:Drug)-[:DRUG_HELD_BY]->(lab:Company)
             |WITH drug, lab
             |ORDER BY lab.identifier ASC
-            |RETURN drug {.cisCode}, COLLECT(lab.identifier) AS labIds
-            |ORDER BY drug.cisCode""".trimMargin()).use {
+            |RETURN drug {.cis_code}, COLLECT(lab.identifier) AS labIds
+            |ORDER BY drug.cis_code""".trimMargin()).use {
 
             assertThat(it).containsExactly(
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60538772"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60538772"))),
                             Pair("labIds", listOf("QBSTAWWV"))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "61266250"))),
+                            Pair("drug", mapOf(Pair("cis_code", "61266250"))),
                             Pair("labIds", listOf("GEJLGPVD"))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "62170486"))),
+                            Pair("drug", mapOf(Pair("cis_code", "62170486"))),
                             Pair("labIds", listOf("ARHHJTWT"))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "62869109"))),
+                            Pair("drug", mapOf(Pair("cis_code", "62869109"))),
                             Pair("labIds", listOf("ARHHJTWT", "GEJLGPVD"))
                     )
             )
@@ -148,12 +151,12 @@ class DrugImporterTest {
             |MATCH (drug:Drug)-[:DRUG_HELD_BY]->(lab:Company)
             |WITH drug, lab
             |ORDER BY lab.identifier ASC
-            |RETURN drug {.cisCode}, COLLECT(lab.identifier) AS labIds
-            |ORDER BY drug.cisCode""".trimMargin()).use {
+            |RETURN drug {.cis_code}, COLLECT(lab.identifier) AS labIds
+            |ORDER BY drug.cis_code""".trimMargin()).use {
 
             assertThat(it).containsExactly(
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60538772"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60538772"))),
                             Pair("labIds", listOf("SOMEREF."))
                     )
             )
@@ -180,7 +183,7 @@ class DrugImporterTest {
             |MATCH (drug:Drug)-[:DRUG_HELD_BY]->(lab:Company)
             |WITH drug, lab
             |ORDER BY lab.name ASC
-            |RETURN drug.cisCode AS drugCode, COLLECT(lab.name) AS labNames""".trimMargin()).use {
+            |RETURN drug.cis_code AS drugCode, COLLECT(lab.name) AS labNames""".trimMargin()).use {
 
             assertThat(it).containsExactly(
                     mapOf(
@@ -191,7 +194,6 @@ class DrugImporterTest {
         }
         assertThat(commitCounter.getCount()).isEqualTo(1)
     }
-
 
     @Test
     fun `batches commits`() {
@@ -210,13 +212,13 @@ class DrugImporterTest {
             subject.import(it)
         }
 
-        val drugLabel = Label.label("Drug")
+        val drugLabel = label("Drug")
         graphDb.graphDatabaseService.beginTx().use {
             assertThat(graphDb.graphDatabaseService.schema().indexes)
                     .extracting("label", "propertyKeys", "constraintIndex")
                     .contains(
                             Tuple.tuple(drugLabel, listOf("name"), false),
-                            Tuple.tuple(drugLabel, listOf("cisCode"), true)
+                            Tuple.tuple(drugLabel, listOf("cis_code"), true)
                     )
         }
     }
@@ -231,7 +233,7 @@ class DrugImporterTest {
             assertThat(graphDb.graphDatabaseService.schema().indexes)
                     .extracting("label", "propertyKeys", "constraintIndex")
                     .contains(
-                            Tuple.tuple(Label.label("Ansm"), listOf("name"), false)
+                            Tuple.tuple(label("Ansm"), listOf("name"), false)
                     )
         }
     }

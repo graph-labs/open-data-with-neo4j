@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.graphlabs.neo4j
+package fr.graphlabs.neo4j.agnostic.collections
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.fail

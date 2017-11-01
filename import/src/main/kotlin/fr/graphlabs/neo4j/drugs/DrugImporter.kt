@@ -16,11 +16,11 @@
 package fr.graphlabs.neo4j.drugs
 
 import fr.graphlabs.neo4j.*
-import org.neo4j.driver.v1.AccessMode
-import org.neo4j.driver.v1.AuthTokens
-import org.neo4j.driver.v1.GraphDatabase
-import org.neo4j.driver.v1.Session
-import org.neo4j.driver.v1.StatementResult
+import fr.graphlabs.neo4j.agnostic.collections.Streams
+import fr.graphlabs.neo4j.agnostic.collections.batch
+import fr.graphlabs.neo4j.agnostic.collections.setValuesUpperCase
+import fr.graphlabs.neo4j.agnostic.csv.CsvMapIterator
+import org.neo4j.driver.v1.*
 import org.supercsv.prefs.CsvPreference
 import java.io.Reader
 import java.util.*
@@ -53,31 +53,28 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
         }
     }
 
-    private fun streamRows(reader: Reader): Stream<Map<String, Any>> {
-        val stream = Streams.fromIterator(CsvMapIterator(arrayOf(
-                "cisCode", "drugName",
-                null, null, null, null, null,
-                null, null, null,
-                "labNames",
-                null
-        ), reader, skipHeader = false, prefs = CsvPreference.TAB_PREFERENCE))
-
-        return stream
+    private fun streamRows(reader: Reader): Stream<Row> {
+        val columns = Array<String?>(12, { null })
+        columns[0] = "cis_code"
+        columns[1] = "drug_name"
+        columns[10] = "lab_names"
+        val format = CsvPreference.TAB_PREFERENCE
+        return Streams.fromIterator(CsvMapIterator(columns, reader, skipHeader = false, prefs = format))
                 .map {
-                    val rows = it.toMutableMap()
+                    @Suppress("UNCHECKED_CAST")
+                    val rows = it.toMutableMap() as MutableRow
                     rows.setValuesUpperCase(Locale.FRENCH)
-                    val result = rows as MutableMap<String, Any>
-                    result["labNames"] = rows["labNames"]!!.split(";").map { it.trim() }.toTypedArray()
-                    result
+                    rows["lab_names"] = rows["lab_names"]!!.toString().split(";").map { it.trim() }.toTypedArray()
+                    rows
                 }
     }
 
-    private fun importDrugGraph(session: Session, rows: List<Map<String, Any>>, labNameSimilarity: Double): StatementResult {
+    private fun importDrugGraph(session: Session, rows: List<Row>, labNameSimilarity: Double): StatementResult {
         return session.run("""
             UNWIND {rows} as row
-            MERGE (drug:Drug {cisCode: row.cisCode, name: row.drugName})
+            MERGE (drug:Drug {cis_code: row.cis_code, name: row.drug_name})
             WITH drug, row
-            UNWIND row.labNames AS labName
+            UNWIND row.lab_names AS labName
             MATCH (lab:Company)
             WITH drug, lab, labName, strings.similarity(labName, lab.name) AS similarity
             WITH drug, CASE WHEN similarity > {threshold} THEN lab ELSE NULL END AS lab, labName
@@ -95,7 +92,7 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
     private fun createIndices(session: Session) {
         session.beginTransaction().use {
             it.run("CREATE INDEX ON :Drug(name)")
-            it.run("CREATE CONSTRAINT ON (d:Drug) ASSERT d.cisCode IS UNIQUE")
+            it.run("CREATE CONSTRAINT ON (d:Drug) ASSERT d.cis_code IS UNIQUE")
             it.run("CREATE INDEX ON :Ansm(name)")
             it.success()
         }

@@ -56,32 +56,32 @@ class PackageImporterTest {
 
         graphDb.graphDatabaseService.execute("""
             |MATCH (package:Package)<-[:DRUG_PACKAGED_AS]-(drug:Drug)
-            |RETURN drug {.cisCode}, package {.cip13Code, .name}
-            |ORDER BY drug.cisCode, package.cip13Code""".trimMargin()).use {
+            |RETURN drug {.cis_code}, package {.cip13_code, .name}
+            |ORDER BY drug.cis_code, package.cip13_code""".trimMargin()).use {
 
             assertThat(it).containsExactly(
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60002283"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60002283"))),
                             Pair("package", mapOf(
-                                    Pair("cip13Code", "3400949497294"),
+                                    Pair("cip13_code", "3400949497294"),
                                     Pair("name", "PLAQUETTE(S) PVC PVDC ALUMINIUM DE 30 COMPRIMÉ(S)")))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60002283"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60002283"))),
                             Pair("package", mapOf(
-                                    Pair("cip13Code", "3400949497706"),
+                                    Pair("cip13_code", "3400949497706"),
                                     Pair("name", "PLAQUETTE(S) PVC PVDC ALUMINIUM DE 90 COMPRIMÉ(S)")))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60002504"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60002504"))),
                             Pair("package", mapOf(
-                                    Pair("cip13Code", "3400933208639"),
+                                    Pair("cip13_code", "3400933208639"),
                                     Pair("name", "TUBE(S) POLYPROPYLÈNE DE 30 COMPRIMÉ(S)")))
                     ),
                     mapOf(
-                            Pair("drug", mapOf(Pair("cisCode", "60003620"))),
+                            Pair("drug", mapOf(Pair("cis_code", "60003620"))),
                             Pair("package", mapOf(
-                                    Pair("cip13Code", "3400936963504"),
+                                    Pair("cip13_code", "3400936963504"),
                                     Pair("name", "20 RÉCIPIENT(S) UNIDOSE(S) POLYÉTHYLÈNE DE 2 ML SUREMBALLÉE(S)/SURPOCHÉE(S) PAR PLAQUETTE DE 5 RÉCIPIENTS UNIDOSES")))
                     )
             )
@@ -101,7 +101,7 @@ class PackageImporterTest {
                     .extracting("label", "propertyKeys", "constraintIndex")
                     .contains(
                             Tuple.tuple(packageLabel, listOf("name"), false),
-                            Tuple.tuple(packageLabel, listOf("cip13Code"), true)
+                            Tuple.tuple(packageLabel, listOf("cip13_code"), true)
                     )
         }
     }
@@ -116,7 +116,7 @@ class PackageImporterTest {
             assertThat(graphDb.graphDatabaseService.schema().indexes)
                     .extracting("label", "propertyKeys", "constraintIndex")
                     .contains(
-                            Tuple.tuple(Label.label("DrugFromPackage"), listOf("cisCode"), true)
+                            Tuple.tuple(Label.label("DrugFromPackage"), listOf("cis_code"), true)
                     )
         }
     }

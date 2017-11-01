@@ -15,6 +15,9 @@
  */
 package fr.graphlabs.neo4j
 
+internal typealias Row = Map<String, Any?>
+internal typealias MutableRow = MutableMap<String, Any?>
+
 interface ImportCommand {
     fun performImport()
 }
