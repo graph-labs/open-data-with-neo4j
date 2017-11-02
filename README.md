@@ -65,3 +65,22 @@ First, convert the file to UTF-8:
                                                 --password
  Neo4j password:
 ```
+
+## Starting
+
+Run `mvn -am -pl api clean package` first if necessary.
+
+```
+ $> export NEO4J_PASSWORD=s3cr3t; java -jar api/target/api-1.0.0-SNAPSHOT.jar
+```
+
+Other available envvars:
+
+ - `NEO4J_ADDRESS` (Bolt URI, defaults to local one)
+ - `NEO4J_USER` (defaults to `neo4j`)
+
+Available APIs:
+
+ - `/packages/[package-name]/labs`
+ - `/health-professionals/[first-name]/[last-name]/benefits`
+ - `/benefits/[year]/health-professionals`
