@@ -86,7 +86,7 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
             MERGE (ms)<-[:SPECIALIZES_IN]-(hp)
             MERGE (y:Year {year: row.year})
             MERGE (y)<-[:MONTH_IN_YEAR]-(m:Month {month: row.month})
-            MERGE (y)<-[:MONTH_IN_YEAR]-(m)<-[:DAY_IN_MONTH]-(d:Day {day: row.day})
+            MERGE (m)<-[:DAY_IN_MONTH]-(d:Day {day: row.day})
             MERGE (bt:BenefitType {type: row.benefit_type})
             CREATE (b:Benefit {amount: row.benefit_amount})
             CREATE (b)-[:GIVEN_AT_DATE]->(d)
