@@ -15,6 +15,7 @@
  */
 package fr.graphlabs.neo4j.benefits
 
+import fr.graphlabs.neo4j.execute
 import fr.graphlabs.neo4j.labs.Lab
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -47,7 +48,7 @@ class BenefitsRepositoryTest {
 
     @Test
     fun `finds benefits by health professional`() {
-        execute("""
+        neo4j.execute("""
                 CREATE (hp:HealthProfessional {first_name: 'Jane', last_name: 'Doe'})
                 CREATE (:Year {year: '2017'})<-[:MONTH_IN_YEAR]-(m:Month {month: '04'})
                 CREATE (m)<-[:DAY_IN_MONTH]-(d:Day {day:'01'})
@@ -68,14 +69,5 @@ class BenefitsRepositoryTest {
                                 BenefitDate("2017", "04", "01"),
                                 Lab("XYZ", "XYZ labs"))
                 )
-
-    }
-
-    private fun execute(cypher: String) {
-        val db = neo4j.graphDatabaseService
-        db.beginTx().use {
-            db.execute(cypher)
-            it.success()
-        }
     }
 }

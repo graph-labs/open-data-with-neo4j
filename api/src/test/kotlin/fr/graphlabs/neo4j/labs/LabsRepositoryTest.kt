@@ -15,6 +15,7 @@
  */
 package fr.graphlabs.neo4j.labs
 
+import fr.graphlabs.neo4j.execute
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
@@ -46,7 +47,7 @@ class LabsRepositoryTest {
 
     @Test
     fun `finds labs by marketed drug name`() {
-        execute("""
+        neo4j.execute("""
                 CREATE (lab1:Company {identifier: 'XXX', name: 'Lab 1'})
                 CREATE (lab2:Company {identifier: 'YYY', name: 'Lab 2'})
                 CREATE (pack: Package {name:'12 mouchoirs', cip13Code: '1234567891011'})
@@ -60,13 +61,5 @@ class LabsRepositoryTest {
         assertThat(labs)
                 .containsExactly(Lab("XXX", "Lab 1"), Lab("YYY", "Lab 2"))
 
-    }
-
-    private fun execute(cypher: String) {
-        val db = neo4j.graphDatabaseService
-        db.beginTx().use {
-            db.execute(cypher)
-            it.success()
-        }
     }
 }
