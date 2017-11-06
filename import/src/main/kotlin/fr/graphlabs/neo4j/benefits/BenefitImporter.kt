@@ -72,9 +72,19 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
             row.setValuesUpperCase(Locale.FRENCH)
             parseBenefitDate(row)
             row.toMap()
-        }.filter {
+        }.filter(keepValidBenefitRecipient())
+    }
+
+    private fun keepValidBenefitRecipient(): (Map<String, Any?>) -> Boolean {
+        return {
             val benefitRecipientType = it["benefit_recipient_type"]
-            benefitRecipientType !== null && benefitRecipientType.toString() == "[PRS]"
+            val specialtyCode = it["specialty_code"]
+            val firstName = it["first_name"]
+            val lastName = it["last_name"]
+            (benefitRecipientType !== null && benefitRecipientType.toString() == "[PRS]") &&
+                    (specialtyCode !== null && specialtyCode.toString().isNotBlank()) &&
+                    (firstName !== null && firstName.toString().isNotBlank()) &&
+                    (lastName !== null && lastName.toString().isNotBlank())
         }
     }
 
@@ -102,8 +112,6 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
             it.run("CREATE INDEX ON :HealthProfessional(first_name, last_name)")
             it.run("CREATE CONSTRAINT ON (ms:MedicalSpecialty) ASSERT ms.code IS UNIQUE")
             it.run("CREATE CONSTRAINT ON (y:Year) ASSERT y.year IS UNIQUE")
-            it.run("CREATE CONSTRAINT ON (m:Month) ASSERT m.month IS UNIQUE")
-            it.run("CREATE CONSTRAINT ON (d:Day) ASSERT d.day IS UNIQUE")
             it.run("CREATE CONSTRAINT ON (bt:BenefitType) ASSERT bt.type IS UNIQUE")
             it.success()
         }

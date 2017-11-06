@@ -19,10 +19,7 @@ import fr.graphlabs.neo4j.CommitCounter
 import fr.graphlabs.neo4j.Readers.newReader
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple.tuple
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.neo4j.graphdb.Label.label
 import org.neo4j.harness.junit.Neo4jRule
 import org.slf4j.bridge.SLF4JBridgeHandler
@@ -337,9 +334,7 @@ class BenefitImporterTest {
             assertThat(graphDb.graphDatabaseService.schema().indexes)
                     .extracting("label", "propertyKeys", "constraintIndex")
                     .contains(
-                            tuple(label("Year"), listOf("year"), true),
-                            tuple(label("Month"), listOf("month"), true),
-                            tuple(label("Day"), listOf("day"), true)
+                            tuple(label("Year"), listOf("year"), true)
                     )
         }
     }
