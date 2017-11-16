@@ -51,7 +51,7 @@ class BenefitImporterTest {
     @Test
     fun `imports medical specialties`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -71,7 +71,7 @@ class BenefitImporterTest {
     @Test
     fun `imports health professionals`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -91,7 +91,7 @@ class BenefitImporterTest {
     @Test
     fun `imports health professional|specialty links`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -111,7 +111,7 @@ class BenefitImporterTest {
     @Test
     fun `imports dates of benefits`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -133,7 +133,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit types`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -153,7 +153,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefits`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -175,7 +175,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit|benefit date links`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -197,7 +197,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit|benefit nature links`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -219,7 +219,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit senders aka labs`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -239,7 +239,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit sender|benefit links`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -261,7 +261,7 @@ class BenefitImporterTest {
     @Test
     fun `imports benefit receiver aka health professional|benefit links`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -296,7 +296,7 @@ class BenefitImporterTest {
     @Test
     fun `creates indices for health professionals`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {
@@ -311,7 +311,7 @@ class BenefitImporterTest {
     @Test
     fun `creates indices for medical specialties`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val medicalSpecialtyLabel = label("MedicalSpecialty")
@@ -327,7 +327,7 @@ class BenefitImporterTest {
     @Test
     fun `creates indices for years, months and days`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {
@@ -342,7 +342,7 @@ class BenefitImporterTest {
     @Test
     fun `creates indices for benefit types`() {
         newReader("/benefits.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {

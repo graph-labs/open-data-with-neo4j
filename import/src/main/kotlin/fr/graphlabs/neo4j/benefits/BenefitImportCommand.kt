@@ -41,11 +41,11 @@ class BenefitImportCommand : ImportCommand {
     var password: String? = null
 
     @Parameter(names = arrayOf("-s", "--batch-size"), description = "Advanced: batch size")
-    var batchSize: Int = 500
+    var batchSize: Int = 5000
 
     override fun performImport() {
         val importer = BenefitImporter(boltUri, username, password)
-        importer.import(BufferedReader(fileReader(csvFile), batchSize))
+        importer.import(BufferedReader(fileReader(csvFile)), batchSize)
     }
 
     private fun fileReader(path: String) = InputStreamReader(FileInputStream(path), StandardCharsets.UTF_8)

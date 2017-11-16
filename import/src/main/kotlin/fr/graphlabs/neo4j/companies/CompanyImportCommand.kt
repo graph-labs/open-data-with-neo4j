@@ -43,7 +43,7 @@ class CompanyImportCommand : ImportCommand {
 
     override fun performImport() {
         val importer = CompanyImporter(boltUri, username, password)
-        importer.import(BufferedReader(fileReader(csvFile), batchSize))
+        importer.import(BufferedReader(fileReader(csvFile)), batchSize)
     }
 
     private fun fileReader(path: String) = InputStreamReader(FileInputStream(path), StandardCharsets.UTF_8)

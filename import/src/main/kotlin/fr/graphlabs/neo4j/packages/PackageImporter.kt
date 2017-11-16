@@ -36,7 +36,7 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
                 GraphDatabase.driver(boltUri, AuthTokens.basic(username, password.orEmpty()))
             }
 
-    fun import(reader: Reader, commitPeriod: Int = 500) {
+    fun import(reader: Reader, commitPeriod: Int) {
         database.session(AccessMode.WRITE).use {
             createIndices(it)
         }

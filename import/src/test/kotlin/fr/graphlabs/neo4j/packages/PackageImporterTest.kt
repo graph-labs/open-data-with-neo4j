@@ -51,7 +51,7 @@ class PackageImporterTest {
     @Test
     fun `imports packages`() {
         newReader("/packages.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -92,7 +92,7 @@ class PackageImporterTest {
     @Test
     fun `creates indices for packages`() {
         newReader("/packages.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val packageLabel = Label.label("Package")
@@ -109,7 +109,7 @@ class PackageImporterTest {
     @Test
     fun `creates indices for unmatched drugs`() {
         newReader("/packages.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {

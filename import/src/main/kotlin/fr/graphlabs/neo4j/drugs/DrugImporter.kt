@@ -36,7 +36,7 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
                 GraphDatabase.driver(boltUri, AuthTokens.basic(username, password.orEmpty()))
             }
 
-    fun import(reader: Reader, commitPeriod: Int = 500, labNameSimilarity: Double = 0.8) {
+    fun import(reader: Reader, commitPeriod: Int, labNameSimilarity: Double = 0.8) {
         database.session(AccessMode.WRITE).use {
             createIndices(it)
         }

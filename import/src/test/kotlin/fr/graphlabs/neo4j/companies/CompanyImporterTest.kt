@@ -54,7 +54,7 @@ class CompanyImporterTest {
     @Test
     fun `imports countries of companies`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -73,7 +73,7 @@ class CompanyImporterTest {
     @Test
     fun `imports cities`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -98,7 +98,7 @@ class CompanyImporterTest {
     @Test
     fun `imports city|country links`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -123,7 +123,7 @@ class CompanyImporterTest {
     @Test
     fun `imports addresses`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -148,7 +148,7 @@ class CompanyImporterTest {
     @Test
     fun `imports address|city links`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -212,7 +212,7 @@ class CompanyImporterTest {
     @Test
     fun `imports business segments`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -235,7 +235,7 @@ class CompanyImporterTest {
     @Test
     fun `imports companies`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -263,7 +263,7 @@ class CompanyImporterTest {
     @Test
     fun `imports address|company|business segment`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute(
@@ -338,7 +338,7 @@ class CompanyImporterTest {
     @Test
     fun `creates indices for country`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val countryLabel = Label.label("Country")
@@ -355,7 +355,7 @@ class CompanyImporterTest {
     @Test
     fun `creates indices for city`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {
@@ -370,7 +370,7 @@ class CompanyImporterTest {
     @Test
     fun `creates indices for business segment`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val businessSegmentLabel = Label.label("BusinessSegment")
@@ -387,7 +387,7 @@ class CompanyImporterTest {
     @Test
     fun `creates indices for companies`() {
         newReader("/companies.csv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val companyLabel = Label.label("Company")

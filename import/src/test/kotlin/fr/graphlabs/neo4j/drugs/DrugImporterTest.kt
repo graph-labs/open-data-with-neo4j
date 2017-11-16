@@ -65,7 +65,7 @@ class DrugImporterTest {
 
         commitCounter.reset()
         newReader("/drugs.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -101,7 +101,7 @@ class DrugImporterTest {
 
         commitCounter.reset()
         newReader("/drugs.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -144,7 +144,7 @@ class DrugImporterTest {
         StringReader("""
 60538772	ABIES CANADENSIS BOIRON, degré de dilution compris entre 2CH et 30CH ou entre 4DH et 60DH	 comprimé et solution(s) et granules et poudre et pommade	cutanée;orale;sublinguale	Autorisation active	Enreg homéo (Proc. Nat.)	Commercialisée	20/09/2013			 $ansmExportLab	Non
         """.trimIndent()).use { 
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -176,7 +176,7 @@ class DrugImporterTest {
         StringReader("""
 60538772	ABIES CANADENSIS BOIRON, degré de dilution compris entre 2CH et 30CH ou entre 4DH et 60DH	 comprimé et solution(s) et granules et poudre et pommade	cutanée;orale;sublinguale	Autorisation active	Enreg homéo (Proc. Nat.)	Commercialisée	20/09/2013			 $ansmExportLabFuzzyMatch;$ansmExportLabNonMatch	Non
         """.trimIndent()).use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.execute("""
@@ -209,7 +209,7 @@ class DrugImporterTest {
     @Test
     fun `creates indices for drugs`() {
         newReader("/drugs.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         val drugLabel = label("Drug")
@@ -226,7 +226,7 @@ class DrugImporterTest {
     @Test
     fun `creates indices for ANSM unmatched companies`() {
         newReader("/drugs.tsv").use {
-            subject.import(it)
+            subject.import(it, 100)
         }
 
         graphDb.graphDatabaseService.beginTx().use {
