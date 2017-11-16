@@ -37,6 +37,9 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500, labNameSimilarity: Double = 0.8) {
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
         reader.use {
             streamRows(it)
                     .asSequence()
@@ -47,9 +50,6 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
                             importDrugGraph(it, rows, labNameSimilarity)
                         }
                     }
-        }
-        database.session(AccessMode.WRITE).use {
-            createIndices(it)
         }
     }
 

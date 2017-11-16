@@ -37,6 +37,9 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500) {
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
         reader.use {
             streamRows(it)
                     .asSequence()
@@ -47,9 +50,6 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
                             upsertBenefitGraph(it, rows)
                         }
                     }
-        }
-        database.session(AccessMode.WRITE).use {
-            createIndices(it)
         }
     }
 

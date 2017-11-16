@@ -36,6 +36,9 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
             }
 
     fun import(reader: Reader, commitPeriod: Int = 500) {
+        database.session(AccessMode.WRITE).use {
+            createIndices(it)
+        }
         reader.use {
             streamRows(it)
                     .asSequence()
@@ -46,9 +49,6 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
                             upsertCompanyGraph(it, rows)
                         }
                     }
-        }
-        database.session(AccessMode.WRITE).use {
-            createIndices(it)
         }
     }
 
