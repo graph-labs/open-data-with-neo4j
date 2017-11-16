@@ -73,7 +73,7 @@ class PackageImporter(boltUri: String, username: String? = null, password: Strin
              UNWIND {rows} AS row
              MERGE (drug:Drug {cis_code: row.cis_code})
              ON CREATE SET drug:DrugFromPackage
-             MERGE (package :Package {name: row.package_name, cip13_code: row.cip13_code})
+             MERGE (package :Package {name: row.package_name}) ON CREATE SET package.cip13_code = row.cip13_code
              MERGE (package)<-[:DRUG_PACKAGED_AS]-(drug)
              RETURN true""".trimIndent(), mapOf(Pair("rows", rows)))
     }

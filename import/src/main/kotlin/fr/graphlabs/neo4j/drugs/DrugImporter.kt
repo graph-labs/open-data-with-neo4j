@@ -72,7 +72,7 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
     private fun importDrugGraph(session: Session, rows: List<Row>, labNameSimilarity: Double): StatementResult {
         return session.run("""
             UNWIND {rows} as row
-            MERGE (drug:Drug {cis_code: row.cis_code, name: row.drug_name})
+            MERGE (drug:Drug {name: row.drug_name}) ON CREATE SET drug.cis_code = row.cis_code
             WITH drug, row
             UNWIND row.lab_names AS labName
             MATCH (lab:Company)

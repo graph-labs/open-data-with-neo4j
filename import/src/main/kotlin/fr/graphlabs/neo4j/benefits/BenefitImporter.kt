@@ -92,7 +92,7 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
         return session.run("""
             UNWIND {rows} AS row
             MERGE (hp:HealthProfessional {first_name: row.first_name, last_name: row.last_name})
-            MERGE (ms:MedicalSpecialty {code: row.specialty_code, name: row.specialty_name})
+            MERGE (ms:MedicalSpecialty {code: row.specialty_code}) ON CREATE SET ms.name = row.specialty_name
             MERGE (ms)<-[:SPECIALIZES_IN]-(hp)
             MERGE (y:Year {year: row.year})
             MERGE (y)<-[:MONTH_IN_YEAR]-(m:Month {month: row.month})

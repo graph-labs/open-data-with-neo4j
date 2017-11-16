@@ -82,13 +82,13 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
     private fun upsertCompanyGraph(session: Session, rows: List<Row>): StatementResult? {
         return session.run("""
             |UNWIND {rows} AS row
-            |MERGE (country:Country {code: row.country_code, name: row.country_name})
+            |MERGE (country:Country {name: row.country_name}) ON CREATE SET country.code = row.country_code
             |MERGE (city:City {name: row.city_name})
             |MERGE (city)-[:LOCATED_IN_COUNTRY]->(country)
             |MERGE (address:Address {address: row.address})
             |MERGE (address)-[:LOCATED_IN_CITY {zipcode: row.zipcode}]->(city)
-            |MERGE (segment:BusinessSegment {code: row.segment_code, label: row.segment_label})
-            |MERGE (company:Company {identifier: row.company_id, name: row.company_name})
+            |MERGE (segment:BusinessSegment {label: row.segment_label}) ON CREATE SET segment.code = row.segment_code
+            |MERGE (company:Company {name: row.company_name}) ON CREATE SET company.identifier = row.company_id
             |MERGE (company)-[:IN_BUSINESS_SEGMENT]->(segment)
             |MERGE (company)-[:LOCATED_AT_ADDRESS]->(address)
             |RETURN true""".trimMargin(), mapOf(Pair("rows", rows)))
