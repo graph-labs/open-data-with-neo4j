@@ -85,7 +85,6 @@ class DrugImporter(boltUri: String, username: String? = null, password: String? 
                MERGE (fallback:Company:Ansm {name: labName})
                MERGE (fallback)<-[:DRUG_HELD_BY]-(drug)
             )
-            RETURN true
         """.trimIndent(), mapOf(Pair("rows", rows), Pair("threshold", labNameSimilarity)))
     }
 

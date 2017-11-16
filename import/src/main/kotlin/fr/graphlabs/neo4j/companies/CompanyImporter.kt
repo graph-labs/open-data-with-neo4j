@@ -90,8 +90,7 @@ class CompanyImporter(boltUri: String, username: String? = null, password: Strin
             |MERGE (segment:BusinessSegment {label: row.segment_label}) ON CREATE SET segment.code = row.segment_code
             |MERGE (company:Company {name: row.company_name}) ON CREATE SET company.identifier = row.company_id
             |MERGE (company)-[:IN_BUSINESS_SEGMENT]->(segment)
-            |MERGE (company)-[:LOCATED_AT_ADDRESS]->(address)
-            |RETURN true""".trimMargin(), mapOf(Pair("rows", rows)))
+            |MERGE (company)-[:LOCATED_AT_ADDRESS]->(address)""".trimMargin(), mapOf(Pair("rows", rows)))
     }
 
     private fun createIndices(session: Session) {

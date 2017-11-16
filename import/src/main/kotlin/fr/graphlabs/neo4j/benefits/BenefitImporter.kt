@@ -103,8 +103,7 @@ class BenefitImporter(boltUri: String, username: String? = null, password: Strin
             CREATE (b)-[:HAS_BENEFIT_TYPE]->(bt)
             MERGE (lab:Company {identifier:row.lab_identifier})
             CREATE (lab)-[:HAS_GIVEN_BENEFIT]->(b)
-            CREATE (hp)<-[:HAS_RECEIVED_BENEFIT]-(b)
-            RETURN true""".trimIndent(), mapOf(Pair("rows", rows)))
+            CREATE (hp)<-[:HAS_RECEIVED_BENEFIT]-(b)""".trimIndent(), mapOf(Pair("rows", rows)))
     }
 
     private fun createIndices(session: Session) {
