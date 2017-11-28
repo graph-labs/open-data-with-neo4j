@@ -1,0 +1,14 @@
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2
+language: java
+jdk:
+  - oraclejdk8
+os:
+  - linux
+before_script:
+install: 
+  - mvn install -DskipTests=true -B -V
+script:
+  - mvn test   
