@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-        <kotlin.version>1.1.51</kotlin.version>
+        <kotlin.version>1.2.0</kotlin.version>
         <junit.version>4.12</junit.version>
         <neo4j.version>3.3.0</neo4j.version>
     </properties>
